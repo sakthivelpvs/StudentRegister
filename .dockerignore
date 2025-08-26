@@ -1,0 +1,23 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+README.md
+.env
+.nyc_output
+coverage
+.nyc_output
+.vscode
+.idea
+*.log
+*.pid
+*.seed
+*.pid.lock
+
+# Build directories
+dist
+client/dist
+
+# Development files
+.replit
+replit.md

@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="font-inter bg-slate-50 text-slate-900">
+
+    <!-- @COMPONENT: LoginScreen -->
+    <div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+        <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-500 rounded-2xl mb-4">
+                    <i class="fas fa-graduation-cap text-white text-2xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-slate-900 mb-2">Student Management</h1>
+                <p class="text-slate-600">Sign in to manage student records</p>
+            </div>
+
+            <form data-event="submit:handleLogin" class="space-y-6">
+                <div class="space-y-2">
+                    <label for="email" class="block text-sm font-medium text-slate-700">Email Address</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        data-mock="true"
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-150" 
+                        placeholder="admin@school.edu"
+                        required
+                    >
+                </div>
+
+                <div class="space-y-2">
+                    <label for="password" class="block text-sm font-medium text-slate-700">Password</label>
+                    <input 
+                        type="password" 
+                        id="password"
+                        data-mock="true" 
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-150" 
+                        placeholder="••••••••"
+                        required
+                    >
+                </div>
+
+                <button 
+                    type="submit" 
+                    data-implementation="Should validate credentials and redirect to dashboard"
+                    class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-xl transition-colors duration-150 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                    Sign In
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-sm text-slate-600" data-mock="true">Demo credentials: admin@school.edu / password</p>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: LoginScreen -->
+
+    <!-- @COMPONENT: MainDashboard -->
+    <div id="mainDashboard" class="hidden min-h-screen bg-slate-50">
+        <!-- @STATE: isLoggedIn:boolean = true -->
+        
+        <!-- Navigation Header -->
+        <nav class="bg-white shadow-sm border-b border-slate-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center space-x-3">
+                        <div class="flex items-center justify-center w-10 h-10 bg-blue-500 rounded-xl">
+                            <i class="fas fa-graduation-cap text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-semibold text-slate-900">Student Management</h1>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <span class="text-sm text-slate-600" data-bind="user.name">Welcome, Admin</span>
+                        <button 
+                            data-event="click:handleLogout"
+                            class="inline-flex items-center px-4 py-2 text-sm font-medium text-slate-700 hover:text-slate-900 transition-colors duration-150"
+                        >
+                            <i class="fas fa-sign-out-alt mr-2"></i>
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            
+            <!-- Header Section -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+                <div>
+                    <h2 class="text-3xl font-bold text-slate-900">Students</h2>
+                    <p class="mt-2 text-slate-600">Manage student records and information</p>
+                </div>
+                <div class="mt-4 sm:mt-0">
+                    <button 
+                        data-event="click:openAddStudentModal"
+                        class="inline-flex items-center px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-xl transition-colors duration-150 shadow-sm"
+                    >
+                        <i class="fas fa-plus mr-2"></i>
+                        Add Student
+                    </button>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-slate-600">Total Students</p>
+                            <p class="text-3xl font-bold text-slate-900" data-bind="stats.totalStudents">1,248</p>
+                        </div>
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-users text-blue-500"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-slate-600">Active Classes</p>
+                            <p class="text-3xl font-bold text-slate-900" data-bind="stats.activeClasses">24</p>
+                        </div>
+                        <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-chalkboard text-emerald-500"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-slate-600">Top Performers</p>
+                            <p class="text-3xl font-bold text-slate-900" data-bind="stats.topPerformers">156</p>
+                        </div>
+                        <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-trophy text-amber-500"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-slate-600">New This Month</p>
+                            <p class="text-3xl font-bold text-slate-900" data-bind="stats.newThisMonth">42</p>
+                        </div>
+                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-user-plus text-purple-500"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search and Filters -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0 sm:space-x-4">
+                    <div class="flex-1">
+                        <div class="relative">
+                            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                            <input 
+                                type="text" 
+                                data-event="input:handleSearch"
+                                placeholder="Search students by name, class, or ID..." 
+                                class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-150"
+                            >
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-3">
+                        <select 
+                            data-event="change:handleClassFilter"
+                            class="px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-150"
+                        >
+                            <option>All Classes</option>
+                            <option data-mock="true">Grade 1</option>
+                            <option data-mock="true">Grade 2</option>
+                            <option data-mock="true">Grade 3</option>
+                            <option data-mock="true">Grade 4</option>
+                            <option data-mock="true">Grade 5</option>
+                        </select>
+                        
+                        <select 
+                            data-event="change:handleRankFilter"
+                            class="px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-150"
+                        >
+                            <option>All Ranks</option>
+                            <option data-mock="true">Excellent</option>
+                            <option data-mock="true">Good</option>
+                            <option data-mock="true">Average</option>
+                            <option data-mock="true">Needs Improvement</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Students Table -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-slate-50 border-b border-slate-200">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-slate-900">Student</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-slate-900">Class</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-slate-900">Address</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-slate-900">Phone</th>
+                                <th class="px-6 py-4 text-left text-sm font-semibold text-slate-900">Rank</th>
+                                <th class="px-6 py-4 text-center text-sm font-semibold text-slate-900">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200">
+                            <!-- @MAP: students.map(student => ( -->
+                            <tr class="hover:bg-slate-50 transition-colors duration-150" data-mock="true">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                                            <span class="text-white font-medium text-sm">JS</span>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-slate-900" data-bind="student.name">John Smith</p>
+                                            <p class="text-sm text-slate-600" data-bind="student.id">ID: STU001</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800" data-bind="student.class">Grade 5</span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <p class="text-sm text-slate-900" data-bind="student.address">123 Main St, Springfield</p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <p class="text-sm text-slate-900" data-bind="student.phone">(555) 123-4567</p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-800" data-bind="student.rank">Excellent</span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <button 
+                                            data-event="click:editStudent"
+                                            class="p-2 text-slate-400 hover:text-blue-500 transition-colors duration-150"
+                                            title="Edit Student"
+                                        >
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button 
+                                            data-event="click:deleteStudent"
+                                            class="p-2 text-slate-400 hover:text-red-500 transition-colors duration-150"
+                                            title="Delete Student"
+                                        >
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr class="hover:bg-slate-50 transition-colors duration-150" data-mock="true">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center">
+                                            <span class="text-white font-medium text-sm">EJ</span>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-slate-900" data-bind="student.name">Emily Johnson</p>
+                                            <p class="text-sm text-slate-600" data-bind="student.id">ID: STU002</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-800" data-bind="student.class">Grade 4</span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <p class="text-sm text-slate-900" data-bind="student.address">456 Oak Ave, Downtown</p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <p class="text-sm text-slate-900" data-bind="student.phone">(555) 987-6543</p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-800" data-bind="student.rank">Excellent</span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <button 
+                                            data-event="click:editStudent"
+                                            class="p-2 text-slate-400 hover:text-blue-500 transition-colors duration-150"
+                                            title="Edit Student"
+                                        >
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button 
+                                            data-event="click:deleteStudent"
+                                            class="p-2 text-slate-400 hover:text-red-500 transition-colors duration-150"
+                                            title="Delete Student"
+                                        >
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr class="hover:bg-slate-50 transition-colors duration-150" data-mock="true">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center">
+                                            <span class="text-white font-medium text-sm">MD</span>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-slate-900" data-bind="student.name">Michael Davis</p>
+                                            <p class="text-sm text-slate-600" data-bind="student.id">ID: STU003</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800" data-bind="student.class">Grade 3</span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <p class="text-sm text-slate-900" data-bind="student.address">789 Pine St, Westside</p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <p class="text-sm text-slate-900" data-bind="student.phone">(555) 456-7890</p>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800" data-bind="student.rank">Good</span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <button 
+                                            data-event="click:editStudent"
+                                            class="p-2 text-slate-400 hover:text-blue-500 transition-colors duration-150"
+                                            title="Edit Student"
+                                        >
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button 
+                                            data-event="click:deleteStudent"
+                                            class="p-2 text-slate-400 hover:text-red-500 transition-colors duration-150"
+                                            title="Delete Student"
+                                        >
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- @END_MAP )) -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                <div class="bg-slate-50 px-6 py-4 border-t border-slate-200">
+                    <div class="flex items-center justify-between">
+                        <div class="text-sm text-slate-600">
+                            Showing <span class="font-medium" data-bind="pagination.start">1</span> to <span class="font-medium" data-bind="pagination.end">10</span> of <span class="font-medium" data-bind="pagination.total">1,248</span> students
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button 
+                                data-event="click:previousPage"
+                                class="px-3 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors duration-150"
+                            >
+                                Previous
+                            </button>
+                            <button class="px-3 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium">1</button>
+                            <button class="px-3 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors duration-150">2</button>
+                            <button class="px-3 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors duration-150">3</button>
+                            <button 
+                                data-event="click:nextPage"
+                                class="px-3 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors duration-150"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <!-- @END_COMPONENT: MainDashboard -->
+
+    <!-- @COMPONENT: AddEditStudentModal -->
+    <div id="studentModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <!-- @STATE: isModalOpen:boolean = false -->
+        <!-- @STATE: editingStudent:object = null -->
+        
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div class="px-6 py-4 border-b border-slate-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-semibold text-slate-900" data-bind="modalTitle">Add New Student</h3>
+                    <button 
+                        data-event="click:closeModal"
+                        class="p-2 text-slate-400 hover:text-slate-600 transition-colors duration-150"
+                    >
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <form data-event="submit:handleSubmitStudent" class="p-6 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label for="studentName" class="block text-sm font-medium text-slate-700">Full Name *</label>
+                        <input 
+                            type="text" 
+                            id="studentName" 
+                            data-bind="formData.name"
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-150" 
+                            placeholder="Enter student's full name"
+                            required
+                        >
+                        <p class="text-xs text-red-500 hidden" data-validation="name">Please enter a valid name</p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="studentClass" class="block text-sm font-medium text-slate-700">Class *</label>
+                        <select 
+                            id="studentClass" 
+                            data-bind="formData.class"
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-150"
+                            required
+                        >
+                            <option value="">Select Class</option>
+                            <option value="grade-1" data-mock="true">Grade 1</option>
+                            <option value="grade-2" data-mock="true">Grade 2</option>
+                            <option value="grade-3" data-mock="true">Grade 3</option>
+                            <option value="grade-4" data-mock="true">Grade 4</option>
+                            <option value="grade-5" data-mock="true">Grade 5</option>
+                        </select>
+                        <p class="text-xs text-red-500 hidden" data-validation="class">Please select a class</p>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label for="studentAddress" class="block text-sm font-medium text-slate-700">Address *</label>
+                    <textarea 
+                        id="studentAddress" 
+                        data-bind="formData.address"
+                        rows="3"
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-150" 
+                        placeholder="Enter complete address"
+                        required
+                    ></textarea>
+                    <p class="text-xs text-red-500 hidden" data-validation="address">Please enter a valid address</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label for="studentPhone" class="block text-sm font-medium text-slate-700">Phone Number *</label>
+                        <input 
+                            type="tel" 
+                            id="studentPhone" 
+                            data-bind="formData.phone"
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-150" 
+                            placeholder="(555) 123-4567"
+                            required
+                        >
+                        <p class="text-xs text-red-500 hidden" data-validation="phone">Please enter a valid phone number</p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="studentRank" class="block text-sm font-medium text-slate-700">Academic Rank *</label>
+                        <select 
+                            id="studentRank" 
+                            data-bind="formData.rank"
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-150"
+                            required
+                        >
+                            <option value="">Select Rank</option>
+                            <option value="excellent" data-mock="true">Excellent</option>
+                            <option value="good" data-mock="true">Good</option>
+                            <option value="average" data-mock="true">Average</option>
+                            <option value="needs-improvement" data-mock="true">Needs Improvement</option>
+                        </select>
+                        <p class="text-xs text-red-500 hidden" data-validation="rank">Please select a rank</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end space-x-4 pt-6 border-t border-slate-200">
+                    <button 
+                        type="button" 
+                        data-event="click:closeModal"
+                        class="px-6 py-3 border border-slate-300 rounded-xl text-slate-700 font-medium hover:bg-slate-50 transition-colors duration-150"
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        type="submit" 
+                        data-implementation="Should validate form and save student data"
+                        class="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-xl transition-colors duration-150"
+                    >
+                        <span data-bind="submitButtonText">Save Student</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: AddEditStudentModal -->
+
+    <!-- @COMPONENT: DeleteConfirmationModal -->
+    <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <!-- @STATE: deleteModalOpen:boolean = false -->
+        <!-- @STATE: studentToDelete:object = null -->
+        
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+            <div class="p-6">
+                <div class="flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mx-auto mb-4">
+                    <i class="fas fa-exclamation-triangle text-red-500 text-2xl"></i>
+                </div>
+                
+                <h3 class="text-xl font-semibold text-slate-900 text-center mb-2">Delete Student</h3>
+                <p class="text-slate-600 text-center mb-6">
+                    Are you sure you want to delete <span class="font-medium" data-bind="studentToDelete.name">John Smith</span>? 
+                    This action cannot be undone.
+                </p>
+                
+                <div class="flex items-center justify-center space-x-4">
+                    <button 
+                        type="button" 
+                        data-event="click:closeDeleteModal"
+                        class="px-6 py-3 border border-slate-300 rounded-xl text-slate-700 font-medium hover:bg-slate-50 transition-colors duration-150"
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        type="button" 
+                        data-event="click:confirmDelete"
+                        data-implementation="Should delete student and refresh table"
+                        class="px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-medium rounded-xl transition-colors duration-150"
+                    >
+                        Delete Student
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: DeleteConfirmationModal -->
+
+    <!-- @COMPONENT: NotificationToast -->
+    <div id="notificationToast" class="fixed top-4 right-4 z-60 hidden">
+        <!-- @STATE: notification:object = { type: 'success', message: '', visible: false } -->
+        
+        <div class="bg-white border border-slate-200 rounded-xl shadow-lg p-4 max-w-sm">
+            <div class="flex items-center space-x-3">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle text-emerald-500" data-notification-icon="success"></i>
+                    <i class="fas fa-exclamation-circle text-red-500 hidden" data-notification-icon="error"></i>
+                    <i class="fas fa-info-circle text-blue-500 hidden" data-notification-icon="info"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-medium text-slate-900" data-bind="notification.message">Student saved successfully!</p>
+                </div>
+                <button 
+                    data-event="click:closeNotification"
+                    class="flex-shrink-0 p-1 text-slate-400 hover:text-slate-600"
+                >
+                    <i class="fas fa-times text-xs"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: NotificationToast -->
+
+    <script>
+        // TODO: Implement authentication, CRUD operations, search/filter functionality, and form validation
+        
+        (function() {
+            // Demo functionality for navigation between screens
+            const loginScreen = document.getElementById('loginScreen');
+            const mainDashboard = document.getElementById('mainDashboard');
+            const studentModal = document.getElementById('studentModal');
+            const deleteModal = document.getElementById('deleteModal');
+            const notificationToast = document.getElementById('notificationToast');
+
+            // Login form submission
+            document.querySelector('#loginScreen form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                loginScreen.classList.add('hidden');
+                mainDashboard.classList.remove('hidden');
+            });
+
+            // Logout functionality
+            document.querySelector('[data-event="click:handleLogout"]').addEventListener('click', function(e) {
+                e.preventDefault();
+                mainDashboard.classList.add('hidden');
+                loginScreen.classList.remove('hidden');
+            });
+
+            // Add student button
+            document.querySelector('[data-event="click:openAddStudentModal"]').addEventListener('click', function(e) {
+                e.preventDefault();
+                studentModal.classList.remove('hidden');
+                document.querySelector('#studentModal h3').textContent = 'Add New Student';
+                document.querySelector('#studentModal form').reset();
+            });
+
+            // Edit student buttons
+            document.querySelectorAll('[data-event="click:editStudent"]').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    studentModal.classList.remove('hidden');
+                    document.querySelector('#studentModal h3').textContent = 'Edit Student';
+                    // TODO: Populate form with student data
+                });
+            });
+
+            // Delete student buttons
+            document.querySelectorAll('[data-event="click:deleteStudent"]').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    deleteModal.classList.remove('hidden');
+                });
+            });
+
+            // Close modals
+            document.querySelectorAll('[data-event="click:closeModal"]').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    studentModal.classList.add('hidden');
+                });
+            });
+
+            document.querySelectorAll('[data-event="click:closeDeleteModal"]').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    deleteModal.classList.add('hidden');
+                });
+            });
+
+            // Student form submission
+            document.querySelector('#studentModal form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                studentModal.classList.add('hidden');
+                showNotification('success', 'Student saved successfully!');
+                // TODO: Add actual form validation and data saving
+            });
+
+            // Confirm delete
+            document.querySelector('[data-event="click:confirmDelete"]').addEventListener('click', function(e) {
+                e.preventDefault();
+                deleteModal.classList.add('hidden');
+                showNotification('success', 'Student deleted successfully!');
+                // TODO: Add actual delete functionality
+            });
+
+            // Search functionality
+            document.querySelector('[data-event="input:handleSearch"]').addEventListener('input', function(e) {
+                // TODO: Implement search filtering
+                console.log('Search:', e.target.value);
+            });
+
+            // Filter functionality
+            document.querySelector('[data-event="change:handleClassFilter"]').addEventListener('change', function(e) {
+                // TODO: Implement class filtering
+                console.log('Class filter:', e.target.value);
+            });
+
+            document.querySelector('[data-event="change:handleRankFilter"]').addEventListener('change', function(e) {
+                // TODO: Implement rank filtering
+                console.log('Rank filter:', e.target.value);
+            });
+
+            // Notification system
+            function showNotification(type, message) {
+                const toast = notificationToast;
+                const messageEl = toast.querySelector('[data-bind="notification.message"]');
+                const icons = toast.querySelectorAll('[data-notification-icon]');
+                
+                messageEl.textContent = message;
+                
+                icons.forEach(icon => icon.classList.add('hidden'));
+                toast.querySelector(`[data-notification-icon="${type}"]`).classList.remove('hidden');
+                
+                toast.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 5000);
+            }
+
+            // Close notification
+            document.querySelector('[data-event="click:closeNotification"]').addEventListener('click', function(e) {
+                e.preventDefault();
+                notificationToast.classList.add('hidden');
+            });
+
+            // Modal backdrop clicks
+            studentModal.addEventListener('click', function(e) {
+                if (e.target === studentModal) {
+                    studentModal.classList.add('hidden');
+                }
+            });
+
+            deleteModal.addEventListener('click', function(e) {
+                if (e.target === deleteModal) {
+                    deleteModal.classList.add('hidden');
+                }
+            });
+
+            // Initialize with login screen
+            loginScreen.classList.remove('hidden');
+            mainDashboard.classList.add('hidden');
+        })();
+    </script>
+</body>
+</html>
