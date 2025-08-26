@@ -1,0 +1,38 @@
+# Student Management System - Localhost Export
+
+This package contains everything needed to run the Student Management System on your local machine.
+
+## Quick Start
+
+1. Extract this ZIP file
+2. Install Node.js 18+ and PostgreSQL
+3. Run setup commands:
+
+```bash
+# Install dependencies
+npm install
+
+# Setup database
+createdb student_management
+psql student_management < database-export.sql
+
+# Set environment variables
+cp .env.example .env
+# Edit .env with your database URL
+
+# Start the application
+npm run dev
+```
+
+The application will be available at http://localhost:5000
+
+## Login Credentials
+- Username: admin
+- Password: pass123
+
+## Included Files
+- Complete source code
+- Database schema and sample data
+- Environment configuration
+- Development scripts
+- Documentation
