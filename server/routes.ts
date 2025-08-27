@@ -4,9 +4,6 @@ import { storage } from "./storage";
 import { getSession, isAuthenticated, initializeDefaultUser } from "./auth";
 import { insertStudentSchema, loginSchema } from "@shared/schema";
 import { z } from "zod";
-import path from "path";
-import { fileURLToPath } from "url";
-import { existsSync } from "fs";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Session middleware
@@ -140,25 +137,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to delete student" });
     }
   });
-
-  // ✅ Healthcheck route for Railway
-  app.get("/api/health", (_req, res) => {
-    res.json({ status: "ok", uptime: process.uptime() });
-  });
-
-  // ✅ Serve React frontend (SPA fallback) in production
-  if (app.get("env") === "production") {
-    const __dirname = path.dirname(fileURLToPath(import.meta.url));
-    const clientDist = path.join(__dirname, "../client/dist");
-
-    if (existsSync(clientDist)) {
-      app.use(express.static(clientDist));
-
-      app.get("*", (_req, res) => {
-        res.sendFile(path.join(clientDist, "index.html"));
-      });
-    }
-  }
 
   const httpServer = createServer(app);
   return httpServer;
