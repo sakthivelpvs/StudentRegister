@@ -52,7 +52,7 @@ export async function setupVite(app: Express, server: Server) {
         "index.html",
       );
 
-      // always reload the index.html file from disk incase it changes
+      // always reload the index.html file from disk in case it changes
       let template = await fs.promises.readFile(clientTemplate, "utf-8");
       template = template.replace(
         `src="/src/main.tsx"`,
@@ -68,15 +68,16 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  const distPath = path.resolve(import.meta.dirname, "../client/dist");
+  // ✅ Match vite.config.ts: build.outDir = dist/public
+  const distPath = path.resolve(process.cwd(), "dist/public");
 
   if (!fs.existsSync(distPath)) {
     throw new Error(
-      `Could not find the build directory: ${distPath}. Did you run "npm run build"?`
+      `Could not find the build directory: ${distPath}. Did you run "npm run build"?`,
     );
   }
 
-  // Serve static assets from React build
+  // Serve static assets from the Vite build
   app.use(express.static(distPath));
 
   // Fallback to index.html for React Router
